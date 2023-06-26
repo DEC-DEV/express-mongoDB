@@ -1,0 +1,62 @@
+<h1>{{title}}</h1> <!--1.타이틀 영역-->
+
+<!--2. 검색어 영역-->
+<input type="text" name="search" id="search" value="{{search}}" size="50" placeholder="검색어를 입력하세요." />
+<button onclick="location.href=`/?search=&{document.getElementById('search').value}`">검색</button>
+<!--버튼 클릭시 search 변수에 검색어 데이터를 담아서 서버로 전송-->
+</br>
+
+<!--3. 글쓰기 페이지 이동 링크-->
+<a href="/write">글쓰기</a>
+
+<!--4. 글 목록-->
+<div>
+  <table>
+    <thead>
+      <tr>
+        <th width="50%">제목</th>
+        <th>작성자</th>
+        <th>조회수</th>
+        <th>등록일</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each posts}}
+      <tr>
+        <td><a href="/detail/{{_id}}">{{title}}</a></td> <!--상세 페이지 링크 -->
+        <td align="center">{{writer}}</td>
+        <td align="center">{{hits}}</td>
+        <td align="center">{{dateString createDt}}</td> <!-- dateString 헬퍼 함수 사용 -->
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<!--5. 페이징 영역-->
+<div>
+  {{#with paginator}} <!-- with 내장 헬퍼 함수 사용-->
+  <a href="/?page=1&search={{@root.search}}"><<</a>
+  {{#if hasPrev}}
+  <a href="/?page={{prevPage}}&search={{@root.search}}" ><</a>
+  {{else}}
+  <a><</a>
+  {{/if}}
+  {{#each pageList}}
+  {{#if (eq . @root.paginator.page)}} <!-- eq 내장 헬퍼 함수 사용-->
+  <a>{{.}}</a>
+  {{else}}
+  <a href="/?page={{.}}&search={{@root.search}}">{{.}}</a>
+  {{/if}}
+  {{/each}}
+  {{#if hasNext}}
+  <a href="/?page={{nextPage}}&search={{@root.search}}">></a>
+  {{else}}
+  <a>></a>
+  {{/if}}
+  <a href="/?page={{lastPage}}&search={{@root.search}}">>></a>
+  {{/with}}
+</div>
+
+
+
