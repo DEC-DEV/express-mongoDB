@@ -40,10 +40,39 @@ app.get("/", async(req,res) => {
   }
 });
 
-//쓰기 페이지 이동
+//쓰기 페이지 이동 mode는 create
 app.get("/write", (req,res) => { 
-  res.render("write", {title: "테스트 게시판"});
+  res.render("write", {title: "테스트 게시판" , mode: "create"});
 });
+
+//수정 페이지 이동 mode는 modify
+app.get("/modify/:id", async (req, res) => {
+  const { id } = req.params.id;
+  const post = await postService.getPostById(collection, req.params.id);
+  console.log(post);
+  res.render("write", { title: "테스트 게시판", mode: "modify", post});
+});
+
+//게시글 수정 API
+app.post("/modify/", async (req, res) => {
+  const { id, title, writer, password, content } = req.body;
+  const post = {
+    title,
+    writer,
+    password,
+    content,
+    createDt: new Date().toISOString(),
+  };
+  // 업데이트 결과
+  try{
+    const result = postService.updatePost(collection, id, post);
+    res.redirect(`/detail/${id}`);
+  } catch (error) { //실패하면 리스트로 가기
+    console.error(error);
+    res.render("/");
+  }
+  
+})
 
 
 // 글쓰기
@@ -62,6 +91,20 @@ app.get("/detail/:id", async(req,res) => {
     post: result.value,
   });
 });
+
+//패스워드 체크
+app.post("check-password", async(req,res) => {
+  const { id, password } = req.body; // {} 구조 분해 할당으로 각각 가져옴
+  //postService의 getPostByIdAndPassword() 함수를 사용해 게시글 데이터 확인
+  const post = await postService.getPostByIdAndPassword(collection, { id, password});
+  //데이터가 있으면 isExist는 true, 없으먼 isExist는 false
+  if(!post) {
+    return res.status(404).json({ isExist: false}) ;
+  } else {
+    return res.json({ isExist: true});
+  }
+});
+
 
 
 

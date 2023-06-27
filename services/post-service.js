@@ -40,9 +40,32 @@ async function list(collection, page, search){
   return [posts, paginatorObj];
 }
 
+async function getPostByIdAndPassword(collection, { id, password}){
+  return await collection.fineOne({ _id: ObjectId(id), password: password } , projectionOption);
+  // _id를 ObjectId(id)로 가져오는 이유는 몽고DB에서 id가 ObjectId형식으로 지정되었기 때문, password는 일반형식. projectionOption은 
+}
+
+// id로 데이터 불러오기
+async function getPostById(collection, id){
+  return await collection.findOne({ _id: ObjectId(id) }, projectionOption);
+}
+
+async function updatePost(collection, id, post) {
+  const toUpdatePost = {
+    $set: {
+      ...post,
+    },
+  };
+  return await collection.updateOne({_id: ObjectId(id) }, toUpdatePost);
+}
+
 module.exports = { // require()로 파일을 임포트시 외부로 노출 하는 객체
   writePost,
   list,
   getDetailPost,
+  getPostByIdAndPassword,
+  getPostById,
+  updatePost,
+
 };
 

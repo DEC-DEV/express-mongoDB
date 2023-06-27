@@ -1,71 +1,94 @@
 <h1>{{title}}</h1>
 
-<h2>제목 입니다.</h2> <!-- 1. 게시글의 제목-->
-<div>
-  작성자 : <b>작성자 이름</b> <!--2. 작성자 이름-->
-</div>
-
-<div>
-    조회수 : 6771 | 작성일시 : 2023-06-23 00:00:00 <!-- 3. 조회수와 작성일시-->
-    <button onclick="modifyPost()">수정</button> <!-- 4. 게시글 관련 버튼 영역-->
-    <button onclick="deletePost()">삭제</button> 
-</div>
-
-<div> <!--5. 본문 표시 영역-->
-  <pre>I got ice in my veins, blood in my eyes
-Hate in my heart, love in my mind
-I seen nights full of pain, days are the same
-You keep the sunshine, save me the rain
-I search but never find, hurt but never cry
-I work and forever try, but I'm cursed, so never mind
-And it's worse, but better times seem further and beyond
-The top gets higher the more that I climb
-The spot gets smaller and I get bigger
-Tryna get in where I fit in, no room for a nigga
-  </pre>
-</div>
-
-<section>
+{{#with post}} <!-- post 객체를 사용하도록 with로 감싸기-->
+  <h2 class="text-xl">{{title}}</h2> <!-- 1. 게시글의 제목-->
   <div>
-    <h3>3개의 댓글이 있습니다.</h3> <!-- 6. 댓글 개수 표시-->
+    작성자 : <b>{{writer}}</b> <!--2. 작성자 이름-->
   </div>
 
-  <form method="post" action="/write-comment"> <!-- 7. 댓글 작성 폼-->
+  <div>
+      조회수 : {{hits}} | 작성일시 : {{dateString createDt}} <!-- 3. 조회수와 작성일시-->
+      <button onclick="modifyPost()">수정</button> <!-- 4. 게시글 관련 버튼 영역-->
+      <button onclick="deletePost()">삭제</button> 
+  </div>
+
+  <div> <!--5. 본문 표시 영역-->
+    <pre>{{content}}</pre>
+  </div>
+
+  <section>
+    <div>
+      <h3>3개의 댓글이 있습니다.</h3> <!-- 6. 댓글 개수 표시-->
+    </div>
+
+    <form method="post" action="/write-comment"> <!-- 7. 댓글 작성 폼-->
+      <div>
+        <div>
+          <input type="text" name="name" placeholder="이름" />
+          <input type="password" name="password" placeholder="비밀번호" />
+        </div>
+        <div>
+          <textarea cols="40" rows="3" name="comment" placeholder="댓글을 입력하세요."></textarea> <br /><br />
+          <!-- 8. 댓글 전송 버튼-->
+          <button>댓글 쓰기</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- 9. 댓글 표시 영역-->
+  <section>
     <div>
       <div>
-        <input type="text" name="name" placeholder="이름" />
-        <input type="password" name="password" placeholder="비밀번호" />
+        작성자 : <b>댓글 작성자</b>
       </div>
       <div>
-        <textarea cols="40" rows="3" name="comment" placeholder="댓글을 입력하세요."></textarea> <br /><br />
-        <!-- 8. 댓글 전송 버튼-->
-        <button>댓글 쓰기</button>
+        작성일시 : 2023-06-23 14:05:32
+        <buttom onclick="deleteComment('1')">삭제</buttom>
       </div>
     </div>
-  </form>
-</section>
-
-<!-- 9. 댓글 표시 영역-->
-<section>
-  <div>
     <div>
-      작성자 : <b>댓글 작성자</b>
+      <pre>{{comment}}</pre>
     </div>
-    <div>
-      작성일시 : 2023-06-23 14:05:32
-      <buttom onclick="deleteComment('1')">삭제</buttom>
-    </div>
-  </div>
-  <div>
-    <pre>{{comment}}</pre>
-  </div>
-</section>
+  </section>
+{{/with}}
 
 <footer>
   <div>
-    <a href="/">목록으로</a> <!-- 10. 목록으로 가는 링크-->
+    <a href="/">목록으로</a>
   </div>
 </footer>
+<script>
+  const postOption = {
+    method: 'POST',
+    headers: {
+      'Content-Type':'application/json',
+    },
+  }
+  async function modifyPost(){
+    const password = prompt("패스워드를 입력해주세요");
+    //prompt에서 취소를 누른 경우
+    if(!password) { 
+      return;
+    }
+    // check-password API 실행
+    const result = await fetch("/check-password", {  //fetch(url, option) url은 호출한 api의 경로, option은 method, headers, body 등의 데이터
+      ...postOption,
+      body: JSON.stringify({ id: "{{post._id}}", password}) //http프로토콜은 json 타입을 알지못하므로 문자열의 형태로 변환해야함.
+    });
+
+    // json 함수를 실행하는 경우에도 await를 해줘야함
+    const data = await result.json();
+
+    // 패스워드가 맞는 경우 수정페이지로 이동
+    if(data.isExist) {
+      document.location = "/modify/{{post._id}}"
+    } else {
+      alert("패스워드가 올바르지 않습니다.")
+    }
+  }
+  async function deletePost(){}
+</script>
 
 
 
