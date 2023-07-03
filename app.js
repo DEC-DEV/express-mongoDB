@@ -64,15 +64,9 @@ app.post("/modify/", async (req, res) => {
     createDt: new Date().toISOString(),
   };
   // 업데이트 결과
-  try{
-    const result = postService.updatePost(collection, id, post);
+    const result = await postService.updatePost(collection, id, post);
     res.redirect(`/detail/${id}`);
-  } catch (error) { //실패하면 리스트로 가기
-    console.error(error);
-    res.render("/");
-  }
-  
-})
+});
 
 
 // 글쓰기
@@ -93,16 +87,31 @@ app.get("/detail/:id", async(req,res) => {
 });
 
 //패스워드 체크
-app.post("check-password", async(req,res) => {
+app.post("/check-password", async(req,res) => {
   const { id, password } = req.body; // {} 구조 분해 할당으로 각각 가져옴
   //postService의 getPostByIdAndPassword() 함수를 사용해 게시글 데이터 확인
-  const post = await postService.getPostByIdAndPassword(collection, { id, password});
+  const post = postService.getPostByIdAndPassword(collection, { id, password});
   //데이터가 있으면 isExist는 true, 없으먼 isExist는 false
   if(!post) {
     return res.status(404).json({ isExist: false}) ;
   } else {
     return res.json({ isExist: true});
   }
+});
+
+app.delete("/delete", async (req, res) => {
+  const { id, password } = req.body;
+  try { // collection의 deleteOne을 사용해 게시글 1개 삭제
+    const result = await collection.deleteOne({ _id: ObjectId(id), password: password});
+    if( result.deletedCount !== 1) { // 삭제 결과가 잘못된 경우 처리
+        console.log("삭제 실패");
+        return res.json({ isSuccess: false});
+      }
+      return res.json({ isSuccess: true});
+    } catch (error) {
+      console.error(error);
+      return res.json({ isSuccess: false});
+    }
 });
 
 
