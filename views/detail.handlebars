@@ -92,7 +92,7 @@
   const deleteOption = {
     method: 'DELETE',
     headers: {
-      'Content-Type' : 'application/json',      
+      'Content-Type':'application/json',
     },
   }
 
@@ -104,7 +104,7 @@
 
     const result = await fetch("/delete", { //fetch api 사용해서 delete api 호출
       ...deleteOption,
-      body: JSON.stringify({ id: "{{post.id}}", password})
+      body: JSON.stringify({ id: "{{post._id}}", password })
     });
 
     const data = await result.json(); // delete의 API 결과에 따른 메세지 출력

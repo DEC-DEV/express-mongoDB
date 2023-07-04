@@ -9,6 +9,7 @@ app.use(express.urlencoded({ extended: true })); // express가 URL-encoded 형�
 
 // 몽고디비 연결 함수
 const mongodbConnection = require("./configs/mongodb-connection");
+const { ObjectId } = require("mongodb");
 
 
 
@@ -105,12 +106,12 @@ app.delete("/delete", async (req, res) => {
     const result = await collection.deleteOne({ _id: ObjectId(id), password: password});
     if( result.deletedCount !== 1) { // 삭제 결과가 잘못된 경우 처리
         console.log("삭제 실패");
-        return res.json({ isSuccess: false});
+        return res.json({ isSuccess: false });
       }
-      return res.json({ isSuccess: true});
+      return res.json({ isSuccess: true });
     } catch (error) {
       console.error(error);
-      return res.json({ isSuccess: false});
+      return res.json({ isSuccess: false });
     }
 });
 
