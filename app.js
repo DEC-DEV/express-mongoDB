@@ -115,6 +115,54 @@ app.delete("/delete", async (req, res) => {
     }
 });
 
+app.post("/write-comment", async (req, res) => {
+  const { id, name, password, comment } = req.body; // body에서 데이터 가져오기
+  const post = await postService.getPostById(collection, id); // id로 게시글 정보 가져오기
+
+  if (post.comments) { //게시글에 기존 댓글 리스트가 있으면 추가
+    post.comments.push({
+      idx: post.comments.length + 1,
+      name,
+      password,
+      createDt: new Date().toISOString(),
+    });
+  } else { //게시글에 댓글 정보가 없으면 리스트에 댓글 정보 추가
+    post.comments = [
+      {
+        idx: 1,
+        name,
+        password,
+        comment,
+        createDt: new Date().toISOString(),
+      },
+    ];
+  }
+
+  postService.updatePost(collection, id, post);
+  return res.redirect(`/detail/${id}`);
+});
+
+app.post("/delete-comment", async (req, res) => {
+  const { id, idx, password } = req.body;
+
+  const post = await collection.findOne( //게시글(post)의 comments안에 있는 특정 댓글 데이터를 찾기
+    {
+    _id: ObjectId(id),
+    comments: { $eleMatch: { idx: parseInt(idx), password } },
+    },
+  postService.projectionOption,
+  );
+
+  if(!post) { //데이터가 없으면 isSuccess: false를 주면서 종료
+    return res.json({ isSuccess: false });
+  }
+  //댓글 번호가 idx 이외인 것만 comments에 다시 할당 후 저장
+  post.comments = post.comments.filter((comment) => comment.idx != idx);
+  postService.updatePost(collection, id, post);
+  return res.json( { isSuccess: true });
+});
+
+
 
 
 
